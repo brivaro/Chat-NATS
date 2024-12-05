@@ -12,7 +12,7 @@ var ChatStream jetstream.Stream
 
 var streamConfig = jetstream.StreamConfig{
 	Name:       "SAD",                    // Nombre del stream
-	Subjects:   []string{"chat.*"},      // Sujetos que el stream observará
+	Subjects:   []string{"chat>"},      // Sujetos que el stream observará
 	Storage:    jetstream.FileStorage,     // Tipo de almacenamiento: archivo
 	Replicas:   1,                         // Número de réplicas
 	Retention:  jetstream.LimitsPolicy,    // Retiene mensajes según los límites // Política de retención
@@ -29,11 +29,11 @@ func CreateChatStream() {
 	stream, err := JS.CreateStream(ctx, streamConfig)
 	if err != nil {
 		if err == jetstream.ErrStreamNameAlreadyInUse {
-			log.Printf("Stream already exists!")
+			log.Printf("Chat already exists!")
 		} else {
 			log.Fatal(err)
 		}
 	}
 	ChatStream = stream
-	log.Printf("Welcome! Starting a conversation with your mates ;)")
+	log.Printf("Welcome to the chat! Type your message below ;)\n")
 }
