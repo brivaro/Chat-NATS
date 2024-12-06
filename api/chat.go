@@ -54,8 +54,12 @@ func FetchRecentMessages(channel string) {
         log.Fatalf("Error creating consumer: %v", err)
     }
     // receive up to 10 messages from the stream
-    msgs, err := c.Fetch(10)
+    msgs, err := consumer.Fetch(10)
     if err != nil {
         // handle error
     }
+    // Mostrar los mensajes en la consola
+	for _, msg := range messages {
+		fmt.Printf("[%s] %s: %s\n", msg.Timestamp().Format(time.RFC3339), msg.Header.Get("user"), string(msg.Data))
+	}
 }
