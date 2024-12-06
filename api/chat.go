@@ -3,7 +3,7 @@ package api
 import (
 	"fmt"        
 	"log"        
-	"time" 
+	//"time" 
     //"context"  
 	"chat/initializers"    
 
@@ -23,7 +23,7 @@ func SubscribeToChannel(channel string) {
 
 func PublishMessage(channel, user, message string) {
     subject := fmt.Sprintf(channel)
-    fullMessage := fmt.Sprintf("[%s] %s: %s", time.Now().Format("15:04:05"), user, message)
+    fullMessage := fmt.Sprintf("[%s]: %s", user, message)
     err := initializers.Client.Conn.Publish(subject, []byte(fullMessage))
     if err != nil {
         log.Fatalf("Error publishing mss: %v", err)
