@@ -56,11 +56,7 @@ func FetchRecentMessages(channel string) {
     log.Println("Consumer created to recovery history mss.")
 
     _, err = consumer.Consume(func(msg jetstream.Msg) {
-        fmt.Printf("[%s]: %s\n", 
-            msg.Header.Get("user"), 
-            string(msg.Data),
-        )
-
+        fmt.Printf(string(msg.Data()))
         // No se envía ACK para mantener los mensajes disponibles
     })
     if err != nil {

@@ -44,7 +44,7 @@ func main() {
     api.SubscribeToChannel(channel)
 
     // Recovery historic mss
-    //api.FetchRecentMessages(channel)
+    api.FetchRecentMessages(channel)
 
     // Read terminal mss
     scanner := bufio.NewScanner(os.Stdin)
