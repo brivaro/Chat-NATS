@@ -24,8 +24,7 @@ func SubscribeToChannel(channel string) {
     */
 
     subject := fmt.Sprintf(channel) //("chat.%s", channel)
-
-    //startTime := time.Now().Add(-1 * time.Hour)
+    startTime := time.Now().Add(-1 * time.Hour)
     randId := rand.Intn(10) + 1
     
     consumer, _ := initializers.ChatStream.CreateOrUpdateConsumer(ctx, jetstream.ConsumerConfig{
@@ -34,10 +33,10 @@ func SubscribeToChannel(channel string) {
         Description:   "Consumer to fetch recent messages",
         FilterSubject:  subject,                             // Filtro para el canal específico
         InactiveThreshold: 10 * time.Millisecond,
-        //DeliverPolicy: jetstream.DeliverByStartTimePolicy, // Inicia desde una hora específica
-        //OptStartTime:  &startTime,                        // Hora de inicio
-        AckPolicy:     jetstream.AckNonePolicy,           // Política de recepción: No consume los mensajes
-        //ReplayPolicy:  jetstream.ReplayInstantPolicy,     // Política de Reproducción: Reproducción instantánea
+        DeliverPolicy: DeliverByStartTime,                  // Inicia desde una hora específica
+        OptStartTime:  &startTime,                          // Hora de inicio
+        AckPolicy:     AckNone,                             // Política de recepción: No consume los mensajes
+        ReplayPolicy:  ReplayOriginal,                      // Política de Reproducción: Reproducción instantánea
 	})
     
 	fmt.Println("Created consumer", consumer.CachedInfo().Name)
