@@ -21,7 +21,7 @@ func main() {
 		serverURL, _ = reader.ReadString('\n')
 		serverURL = strings.TrimSpace(serverURL)
 
-		log.Print("Channel:")
+		log.Print("Channel (Format: chat>):")
 		channel, _ = reader.ReadString('\n')
 		channel = strings.TrimSpace(channel)
 

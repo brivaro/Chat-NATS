@@ -22,12 +22,11 @@ func SubscribeToChannel(channel string) {
 }
 
 func PublishMessage(channel, user, message string) {
+    ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	defer cancel()
     subject := fmt.Sprintf(channel)
     fullMessage := fmt.Sprintf("[%s]: %s", user, message)
-    err := initializers.Client.Conn.Publish(subject, []byte(fullMessage))
-    if err != nil {
-        log.Fatalf("Error publishing mss: %v", err)
-    }
+    initializers.JS.Publish(ctx, subject, []byte(fullMessage))
 }
 
 func FetchRecentMessages(channel string) {
@@ -40,8 +39,8 @@ func FetchRecentMessages(channel string) {
 
     // Config consumer
     consumer, err := initializers.ChatStream.CreateOrUpdateConsumer(ctx, jetstream.ConsumerConfig{
-        Name:          "recent-messages",
-        Durable:       "",
+        Name:          "consumer",
+        Durable:       "recent-messages",
         Description:   "Consumer to fetch recent messages",
         FilterSubject: subject,                             // Filtro para el canal específico
         DeliverPolicy: jetstream.DeliverByStartTimePolicy, // Inicia desde una hora específica
