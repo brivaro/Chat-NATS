@@ -22,7 +22,7 @@ func SubscribeToChannel(channel string) {
 }
 
 func PublishMessage(channel, user, message string) {
-    subject := fmt.Sprintf("chat.%s", channel)
+    subject := fmt.Sprintf(channel)
     fullMessage := fmt.Sprintf("[%s] %s: %s", time.Now().Format("15:04:05"), user, message)
     err := initializers.Client.Conn.Publish(subject, []byte(fullMessage))
     if err != nil {
@@ -34,43 +34,24 @@ func FetchRecentMessages(channel string) {
     ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer cancel()
 
-    subject := fmt.Sprintf("chat.%s", channel)
+    subject := fmt.Sprintf(channel) //("chat.%s", channel)
 
     startTime := time.Now().Add(-1 * time.Hour)
 
     // Config consumer
-    consumerConfig := jetstream.ConsumerConfig{
-        Durable:       "recent-msgs",  
-        FilterSubject: subject,          // Filtro para el canal específico
-        DeliverPolicy: jetstream.DeliverByStartTimePolicy, // Entrega mensajes desde un momento específico
-        OptStartTime:  &startTime,       // Hora de inicio (última hora)
-        AckPolicy:     jetstream.AckExplicitPolicy, // Política de recepción
-        ReplayPolicy:   jetstream.ReplayInstantPolicy, // Política de Reproducción
-    }
+	subscription, err := initializers.JS.PullSubscribe(channel, "", nats.PullMaxWaiting(200), nats.StartTime(startTime))
+	if err != nil {
+		log.Fatalf("Error while subscribing to channel: %v", err)
+	}
 
-    // Creating/updating consumer
-    _, err := initializers.JS.CreateOrUpdateConsumer(ctx, "chatSAD", consumerConfig)
-    if err != nil {
-        log.Fatalf("Error creating consumer: %v", err)
-    }
+	log.Printf("Fetching messages from the last hour in channel '%s'...\n", channel)
 
-    sub, err := initializers.Client.Conn.PullSubscribe(subject, "recent-msgs")
-    if err != nil {
-        log.Fatalf("Error subscribing: %v", err)
-    }
+	// Recoger los mensajes del canal (esto no los consume, sólo los muestra)
+	for msg := range subscription.Chan() {
+		// Mostrar el mensaje
+		log.Printf("[%s] %s: %s\n", msg.Subject, msg.Header.Get("user"), string(msg.Data))
+	}
 
-    go func() {
-        for {
-            msgs, err := sub.Fetch(10, nats.Context(context.Background()))
-            if err != nil {
-                log.Printf("Error fetching messages: %v", err)
-                continue
-            }
-            for _, msg := range msgs {
-                log.Printf(string(msg.Data))
-                msg.Ack()
-            }
-        }
-    }()
+	log.Println("Finished fetching messages.")
     
 }
