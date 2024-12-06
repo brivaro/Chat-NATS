@@ -14,13 +14,33 @@ import (
 )
 
 func SubscribeToChannel(channel string) {
+    /*
     _, err := initializers.Client.Conn.Subscribe(channel, func(msg *nats.Msg) {
         log.Printf(string(msg.Data))
     })
+    */
+    
+    consumer, _ := initializers.ChatStream.CreateOrUpdateConsumer(ctx, jetstream.ConsumerConfig{
+        Name:          fmt.Sprintf("consumer_%s", strconv.Itoa(randId)),
+        Durable:       "recent-messages",
+        Description:   "Consumer to fetch recent messages",
+        FilterSubject:  subject,                             // Filtro para el canal específico
+        InactiveThreshold: 10 * time.Millisecond,
+        //DeliverPolicy: jetstream.DeliverByStartTimePolicy, // Inicia desde una hora específica
+        //OptStartTime:  &startTime,                        // Hora de inicio
+        AckPolicy:     jetstream.AckNonePolicy,           // Política de recepción: No consume los mensajes
+        //ReplayPolicy:  jetstream.ReplayInstantPolicy,     // Política de Reproducción: Reproducción instantánea
+	})
+    
+	fmt.Println("Created consumer", consumer.CachedInfo().Name)
 
-    if err != nil {
-        log.Fatalf("Error al suscribirse al canal %s: %v", channel, err)
-    }
+    fmt.Println("# Consume messages using Consume()")
+	consumeContext, _ := consumer.Consume(func(msg jetstream.Msg) {
+		fmt.Printf(msg.Subject())
+		//msg.Ack()
+	})
+	//time.Sleep(100 * time.Millisecond)
+
 }
 
 func PublishMessage(channel, user, message string) {
@@ -29,7 +49,8 @@ func PublishMessage(channel, user, message string) {
 
     subject := fmt.Sprintf(channel)
     fullMessage := fmt.Sprintf("[%s]: %s", user, message)
-/*
+    
+    /*
     err := initializers.Client.Conn.Publish(subject, []byte(fullMessage))
     if err != nil {
         log.Fatalf("Error al publicar mensaje en el canal %s: %v", channel, err)
