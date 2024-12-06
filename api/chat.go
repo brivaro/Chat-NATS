@@ -29,7 +29,7 @@ func PublishMessage(channel, user, message string) {
         log.Fatalf("Error publishing mss: %v", err)
     }
 }
-
+/*
 func FetchRecentMessages(channel string) {
     ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer cancel()
@@ -62,4 +62,4 @@ func FetchRecentMessages(channel string) {
 	for _, msg := range messages {
 		fmt.Printf("[%s] %s: %s\n", msg.Timestamp().Format(time.RFC3339), msg.Header.Get("user"), string(msg.Data))
 	}
-}
+}*/
