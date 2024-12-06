@@ -22,7 +22,7 @@ func main() {
 		serverURL, _ = reader.ReadString('\n')
 		serverURL = strings.TrimSpace(serverURL)
 
-		log.Print("Channel (Format: chat>):") // nats://localhost:4222
+		log.Print("Channel (Format: chat.*):") // nats://localhost:4222
 		channel, _ = reader.ReadString('\n')
 		channel = strings.TrimSpace(channel)
 
@@ -42,10 +42,7 @@ func main() {
     initializers.CreateChatStream()
 
 	// Subscribe
-    api.SubscribeToChannel(channel)
-
-    // Recovery historic mss
-    //api.FetchRecentMessages(channel)
+    api.SubscribeToChannel(channel, user)
 
     // Read terminal mss
     scanner := bufio.NewScanner(os.Stdin)
