@@ -4,11 +4,11 @@ import (
 	"fmt"        
 	"log"        
 	"time" 
-    "context"  
+    //"context"  
 	"chat/initializers"    
 
 	"github.com/nats-io/nats.go"
-    "github.com/nats-io/nats.go/jetstream"
+    //"github.com/nats-io/nats.go/jetstream"
 )
 
 func SubscribeToChannel(channel string) {
