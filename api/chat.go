@@ -3,12 +3,12 @@ package api
 import (
 	"fmt"        
 	"log"        
-	//"time" 
-    //"context"  
+	"time" 
+    "context"  
 	"chat/initializers"    
 
 	"github.com/nats-io/nats.go"
-    //"github.com/nats-io/nats.go/jetstream"
+    "github.com/nats-io/nats.go/jetstream"
 )
 
 func SubscribeToChannel(channel string) {
@@ -29,7 +29,7 @@ func PublishMessage(channel, user, message string) {
         log.Fatalf("Error publishing mss: %v", err)
     }
 }
-/*
+
 func FetchRecentMessages(channel string) {
     ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer cancel()
@@ -39,27 +39,33 @@ func FetchRecentMessages(channel string) {
     startTime := time.Now().Add(-1 * time.Hour)
 
     // Config consumer
-    consumerConfig := jetstream.ConsumerConfig{
-        Durable:       "recent-msgs",  
-        FilterSubject: subject,          // Filtro para el canal específico
-        DeliverPolicy: jetstream.DeliverByStartTimePolicy, // Entrega mensajes desde un momento específico
-        OptStartTime:  &startTime,       // Hora de inicio (última hora)
-        AckPolicy:     jetstream.AckExplicitPolicy, // Política de recepción
-        ReplayPolicy:   jetstream.ReplayInstantPolicy, // Política de Reproducción
+    consumer, err := initializers.ChatStream.CreateOrUpdateConsumer(ctx, jetstream.ConsumerConfig{
+        Name:          "recent-messages",
+        Durable:       "",
+        Description:   "Consumer to fetch recent messages",
+        FilterSubject: subject,                             // Filtro para el canal específico
+        DeliverPolicy: jetstream.DeliverByStartTimePolicy, // Inicia desde una hora específica
+        OptStartTime:  &startTime,                        // Hora de inicio
+        AckPolicy:     jetstream.AckNonePolicy,           // Política de recepción: No consume los mensajes
+        ReplayPolicy:  jetstream.ReplayInstantPolicy,     // Política de Reproducción: Reproducción instantánea
+    })
+    // Creating/updating consumer
+    if err != nil {
+        log.Fatalf("Error creando consumidor: %v", err)
+    }
+    log.Println("Consumer created to recovery history mss.")
+
+    _, err = consumer.Consume(func(msg jetstream.Msg) {
+        fmt.Printf("[%s]: %s\n", 
+            msg.Header.Get("user"), 
+            string(msg.Data),
+        )
+
+        // No se envía ACK para mantener los mensajes disponibles
+    })
+    if err != nil {
+        log.Fatalf("Error consuming mss: %v", err)
     }
 
-    // Creating/updating consumer
-    consumer, err := initializers.ChatStream.CreateConsumer(ctx, consumerConfig)
-    if err != nil {
-        log.Fatalf("Error creating consumer: %v", err)
-    }
-    // receive up to 10 messages from the stream
-    messages, err := consumer.Fetch(10)
-    if err != nil {
-        // handle error
-    }
-    // Mostrar los mensajes en la consola
-	for _, msg := range messages {
-		fmt.Printf("[%s] %s: %s\n", msg.Timestamp().Format(time.RFC3339), msg.Header.Get("user"), string(msg.Data))
-	}
-}*/
+    log.Println("History mss finished!")
+}

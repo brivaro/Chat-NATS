@@ -11,7 +11,7 @@ import (
 var ChatStream jetstream.Stream
 
 var streamConfig = jetstream.StreamConfig{
-	Name:       "chatSAD",                 // Nombre del stream
+	Name:       "SAD",                 // Nombre del stream
 	Subjects:   []string{"*>"},         // Sujetos que el stream observará
 	Storage:    jetstream.FileStorage,     // Tipo de almacenamiento: archivo
 	Replicas:   1,                         // Número de réplicas
