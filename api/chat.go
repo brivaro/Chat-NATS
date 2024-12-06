@@ -31,16 +31,46 @@ func PublishMessage(channel, user, message string) {
 }
 
 func FetchRecentMessages(channel string) {
-    lastHour := time.Now().Add(-1 * time.Hour)
-    msgChan := make(chan *nats.Msg, 100)
-    go func() {
-        for {
-            msg := <-msgChan
-            fmt.Println(string(msg.Data))
-        }
-    }()
+    ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	defer cancel()
+
+    subject := fmt.Sprintf("chat.%s", channel)
+
+    startTime := time.Now().Add(-1 * time.Hour)
+
+    // Config consumer
+    consumerConfig := jetstream.ConsumerConfig{
+        Durable:       "recent-msgs",  
+        FilterSubject: subject,          // Filtro para el canal específico
+        DeliverPolicy: jetstream.DeliverByStartTimePolicy, // Entrega mensajes desde un momento específico
+        OptStartTime:  &startTime,       // Hora de inicio (última hora)
+        AckPolicy:     jetstream.AckExplicitPolicy, // Política de recepción
+        ReplayPolicy:   jetstream.ReplayInstantPolicy, // Política de Reproducción
+    }
+
+    // Creating/updating consumer
+    _, err := initializers.JS.CreateOrUpdateConsumer(ctx, "chatSAD", &consumerConfig)
+    if err != nil {
+        log.Fatalf("Error creating consumer: %v", err)
+    }
+
+    sub, err := initializers.Client.Conn.PullSubscribe(subject, "recent-msgs")
+    if err != nil {
+        log.Fatalf("Error subscribing: %v", err)
+    }
 
     go func() {
-        initializers.JS.PurgeStream(streamName)
+        for {
+            msgs, err := sub.Fetch(10, nats.Context(context.Background()))
+            if err != nil {
+                log.Printf("Error fetching messages: %v", err)
+                continue
+            }
+            for _, msg := range msgs {
+                log.Printf(string(msg.Data))
+                msg.Ack()
+            }
+        }
     }()
+    
 }
