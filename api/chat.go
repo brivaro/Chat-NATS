@@ -43,7 +43,7 @@ func SubscribeToChannel(channel string) {
 	fmt.Println("Created consumer", consumer.CachedInfo().Name)
 
     fmt.Println("# Consume messages using Consume()")
-	consumeContext, _ := consumer.Consume(func(msg jetstream.Msg) {
+	_, _ := consumer.Consume(func(msg jetstream.Msg) {
 		fmt.Printf(msg.Subject())
 		//msg.Ack()
 	})
