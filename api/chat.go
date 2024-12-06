@@ -33,10 +33,10 @@ func SubscribeToChannel(channel string) {
         Description:   "Consumer to fetch recent messages",
         FilterSubject:  subject,                             // Filtro para el canal específico
         InactiveThreshold: 10 * time.Millisecond,
-        DeliverPolicy: DeliverByStartTime,                  // Inicia desde una hora específica
+        DeliverPolicy: jetstream.DeliverByStartTime,                  // Inicia desde una hora específica
         OptStartTime:  &startTime,                          // Hora de inicio
-        AckPolicy:     AckNone,                             // Política de recepción: No consume los mensajes
-        ReplayPolicy:  ReplayOriginal,                      // Política de Reproducción: Reproducción instantánea
+        AckPolicy:     jetstream.AckExplicit,                             // Política de recepción: No consume los mensajes
+        ReplayPolicy:  jetstream.ReplayOriginal,                      // Política de Reproducción: Reproducción instantánea
 	})
     
 	fmt.Println("Created consumer", consumer.CachedInfo().Name)
