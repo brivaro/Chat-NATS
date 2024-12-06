@@ -9,16 +9,24 @@ import (
     "strconv"
     "math/rand"
 
-	"github.com/nats-io/nats.go"
+	//"github.com/nats-io/nats.go"
     "github.com/nats-io/nats.go/jetstream"
 )
 
 func SubscribeToChannel(channel string) {
+    ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+    defer cancel()
+    
     /*
     _, err := initializers.Client.Conn.Subscribe(channel, func(msg *nats.Msg) {
         log.Printf(string(msg.Data))
     })
     */
+
+    subject := fmt.Sprintf(channel) //("chat.%s", channel)
+
+    //startTime := time.Now().Add(-1 * time.Hour)
+    randId := rand.Intn(10) + 1
     
     consumer, _ := initializers.ChatStream.CreateOrUpdateConsumer(ctx, jetstream.ConsumerConfig{
         Name:          fmt.Sprintf("consumer_%s", strconv.Itoa(randId)),
