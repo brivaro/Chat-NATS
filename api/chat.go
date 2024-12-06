@@ -71,7 +71,7 @@ func PublishMessage(channel, user, message string) {
 }
 
 func FetchRecentMessages(channel string) {
-    ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+    /*ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer cancel()
 
     subject := fmt.Sprintf(channel) //("chat.%s", channel)
@@ -96,5 +96,5 @@ func FetchRecentMessages(channel string) {
 		log.Fatal(err)
 	}
     
-    log.Println("Created consumer", consumer.CachedInfo().Name)
+    log.Println("Created consumer", consumer.CachedInfo().Name)*/
 }
