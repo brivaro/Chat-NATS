@@ -69,8 +69,7 @@ func FetchRecentMessages(channel string) {
     msgs, err := consumer.Fetch(10)
     if err != nil {
         // handle error
-    }
-    else{
+    } else {
         for msg := range msgs.Messages() {
             fmt.Printf("Received a JetStream message: %s\n", string(msg.Data()))
         }
