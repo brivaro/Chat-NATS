@@ -25,17 +25,17 @@ func SubscribeToChannel(channel string) {
 
 func PublishMessage(channel, user, message string) {
     ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
-	defer cancel()
+    defer cancel()
 
     subject := fmt.Sprintf(channel)
     fullMessage := fmt.Sprintf("[%s]: %s", user, message)
-
+/*
     err := initializers.Client.Conn.Publish(subject, []byte(fullMessage))
     if err != nil {
         log.Fatalf("Error al publicar mensaje en el canal %s: %v", channel, err)
-    }
+    }*/
 
-    _, err = initializers.JS.Publish(ctx, subject, []byte(fullMessage))
+    _, err := initializers.JS.Publish(ctx, subject, []byte(fullMessage))
     if err != nil {
         log.Fatalf("Error al publicar mensaje en el canal %s: %v", channel, err)
     }

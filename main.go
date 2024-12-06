@@ -5,6 +5,7 @@ import (
 	"log"
 	"strings"
 	"bufio"
+	"os/signal"
 
 	"chat/api"
 	"chat/initializers"
@@ -21,7 +22,7 @@ func main() {
 		serverURL, _ = reader.ReadString('\n')
 		serverURL = strings.TrimSpace(serverURL)
 
-		log.Print("Channel (Format: chat>):")
+		log.Print("Channel (Format: chat>):") // nats://localhost:4222
 		channel, _ = reader.ReadString('\n')
 		channel = strings.TrimSpace(channel)
 
@@ -44,7 +45,7 @@ func main() {
     api.SubscribeToChannel(channel)
 
     // Recovery historic mss
-    api.FetchRecentMessages(channel)
+    //api.FetchRecentMessages(channel)
 
     // Read terminal mss
     scanner := bufio.NewScanner(os.Stdin)
@@ -58,4 +59,10 @@ func main() {
     if err := scanner.Err(); err != nil {
         log.Fatalf("Error reading input: %v", err)
     }
+
+	// graceful shutdown
+	quit := make(chan os.Signal, 1)
+	signal.Notify(quit, os.Interrupt)
+	<-quit
 }
+
