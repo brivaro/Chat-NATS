@@ -54,7 +54,7 @@ func FetchRecentMessages(channel string) {
         log.Fatalf("Error creating consumer: %v", err)
     }
     // receive up to 10 messages from the stream
-    msgs, err := consumer.Fetch(10)
+    messages, err := consumer.Fetch(10)
     if err != nil {
         // handle error
     }
