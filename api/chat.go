@@ -49,7 +49,7 @@ func FetchRecentMessages(channel string) {
     }
 
     // Creating/updating consumer
-    _, err := initializers.JS.CreateOrUpdateConsumer(ctx, "chatSAD", &consumerConfig)
+    _, err := initializers.JS.CreateOrUpdateConsumer(ctx, "chatSAD", consumerConfig)
     if err != nil {
         log.Fatalf("Error creating consumer: %v", err)
     }
