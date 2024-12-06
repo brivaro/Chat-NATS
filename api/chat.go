@@ -39,19 +39,23 @@ func FetchRecentMessages(channel string) {
     startTime := time.Now().Add(-1 * time.Hour)
 
     // Config consumer
-	subscription, err := initializers.JS.PullSubscribe(channel, "", nats.PullMaxWaiting(200), nats.StartTime(startTime))
-	if err != nil {
-		log.Fatalf("Error while subscribing to channel: %v", err)
-	}
+    consumerConfig := jetstream.ConsumerConfig{
+        Durable:       "recent-msgs",  
+        FilterSubject: subject,          // Filtro para el canal específico
+        DeliverPolicy: jetstream.DeliverByStartTimePolicy, // Entrega mensajes desde un momento específico
+        OptStartTime:  &startTime,       // Hora de inicio (última hora)
+        AckPolicy:     jetstream.AckExplicitPolicy, // Política de recepción
+        ReplayPolicy:   jetstream.ReplayInstantPolicy, // Política de Reproducción
+    }
 
-	log.Printf("Fetching messages from the last hour in channel '%s'...\n", channel)
-
-	// Recoger los mensajes del canal (esto no los consume, sólo los muestra)
-	for msg := range subscription.Chan() {
-		// Mostrar el mensaje
-		log.Printf("[%s] %s: %s\n", msg.Subject, msg.Header.Get("user"), string(msg.Data))
-	}
-
-	log.Println("Finished fetching messages.")
-    
+    // Creating/updating consumer
+    consumer, err := initializers.ChatStream.CreateConsumer(ctx, consumerConfig)
+    if err != nil {
+        log.Fatalf("Error creating consumer: %v", err)
+    }
+    // receive up to 10 messages from the stream
+    msgs, err := c.Fetch(10)
+    if err != nil {
+        // handle error
+    }
 }
