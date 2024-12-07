@@ -7,3 +7,8 @@ services:
     command: --js
     ports:
     - 4222:4222
+    volumes:
+      - chat_data:/tmp/nats/jetstream
+
+volumes:
+  chat_data:

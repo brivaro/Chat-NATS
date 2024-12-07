@@ -7,21 +7,32 @@ import (
     "context"  
 	"chat/initializers" 
     //"strconv"
-    "math/rand"
+    //"math/rand"
 
 	//"github.com/nats-io/nats.go"
     "github.com/nats-io/nats.go/jetstream"
 )
+
+var ConsumerCon jetstream.ConsumeContext
+var Consumer jetstream.Consumer
 
 func SubscribeToChannel(channel string, user string) {
     ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
     defer cancel()
 
     startTime := time.Now().Add(-1 * time.Hour)
-    randId := rand.Intn(1000) + 1
-    c := fmt.Sprintf("consumer_%s_%d", user, randId)
+    //randId := rand.Intn(1000) + 1
+    c := fmt.Sprintf("consumer_%s", user)
+
+    // Check if a consumer with the same name already exists
+    _, err := initializers.ChatStream.Consumer(ctx, c)
+    if err == nil { // No error means the consumer exists
+        log.Fatalf("A consumer with the same name already exists.")
+    } else if err != jetstream.ErrConsumerNotFound {
+        log.Fatalf("Error checking consumer: %v", err)
+    }
     
-    consumer, err := initializers.JS.CreateOrUpdateConsumer(ctx, "chats", jetstream.ConsumerConfig{
+    consumer, err := initializers.ChatStream.CreateOrUpdateConsumer(ctx, jetstream.ConsumerConfig{
         Name:          c,
         Durable:       c,
         Description:   c,
@@ -37,11 +48,15 @@ func SubscribeToChannel(channel string, user string) {
     }
 	fmt.Println("Created consumer", consumer.CachedInfo().Name)
 
-	_, _ = consumer.Consume(func(msg jetstream.Msg) {
+	cc, err := consumer.Consume(func(msg jetstream.Msg) {
 		fmt.Println(string(msg.Data()))
 		msg.Ack()
 	})
-
+    if err != nil {
+        log.Fatalf("Error creating consumerContext: %v", err)
+    }
+    ConsumerCon = cc
+    Consumer = consumer
 }
 
 func PublishMessage(channel, user, message string) {
