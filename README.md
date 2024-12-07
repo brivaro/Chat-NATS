@@ -30,9 +30,6 @@ Antes de ejecutar la aplicación, asegúrate de tener instalados los siguientes 
 
    Esto iniciará un servidor NATS con JetStream habilitado, accesible en `nats://localhost:4222`.
 
-3. Construye el proyecto en Go:
-
-   
 
 ## Uso 🚀
 
